@@ -1,0 +1,9 @@
+- Initializing...
+> Using device 0: NVIDIA L4
+> GPU Device has SM 8.9 compute capability
+  Total amount of global memory:   23690805248 bytes
+  64-bit Memory Address:           YES
+# Running the kernel...
+# Kernel complete.
+*** All checks complete.
+- Finalizing...
