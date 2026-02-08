@@ -416,3 +416,11 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+# CUDA binary and intermediate files
+*.i
+*.ii
+*.gpu
+*.ptx
+*.cubin
+*.fatbin
