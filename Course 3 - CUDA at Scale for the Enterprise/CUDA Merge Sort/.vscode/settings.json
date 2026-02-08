@@ -1,0 +1,10 @@
+{
+    "files.associations": {
+        "tuple": "cpp",
+        "chrono": "cpp",
+        "cstdlib": "cpp",
+        "limits": "cpp",
+        "algorithm": "cpp",
+        "random": "cpp"
+    }
+}
