@@ -1,0 +1,20 @@
+./multi_gpu.exe
+Number of GPU Devices: 1
+Device Number: 0
+  Device name: NVIDIA L4
+  Device Compute Major: 8 Minor: 9
+  Max Thread Dimensions: [1024][1024][64]
+  Max Threads Per Block: 1024
+  Number of Multiprocessors: 58
+  Device Clock Rate (KHz): 2040000
+  Memory Bus Width (bits): 192
+  Registers Per Block: 65536
+  Registers Per Multiprocessor: 65536
+  Shared Memory Per Block: 49152
+  Shared Memory Per Multiprocessor: 102400
+  Total Constant Memory (bytes): 65536
+  Total Global Memory (bytes): 23690805248
+  Warp Size: 32
+  Peak Memory Bandwidth (GB/s): 300.048000
+
+The chosen GPU device has an index of: 0
