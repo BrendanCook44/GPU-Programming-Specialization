@@ -34,22 +34,32 @@
 # Define the compiler and flags
 NVCC = /usr/local/cuda/bin/nvcc
 CXX = g++
-CXXFLAGS = -std=c++11 -I/usr/local/cuda/include -Iinclude
-LDFLAGS = -L/usr/local/cuda/lib64 -lcudart -lnppc -lnppial -lnppicc -lnppidei -lnppif -lnppig -lnppim -lnppist -lnppisu -lnppitc
+CXXFLAGS =  -std=c++11 -I/usr/local/cuda/include -I./include -I./libs -I./libs/UtilNPP -I./libs/GL
+LDFLAGS = -L/usr/local/cuda/lib64 -L./libs/lib/x64 -lcudart -lnppc -lnppial -lnppicc -lnppidei -lnppif -lnppig -lnppim -lnppist -lnppisu -lnppitc -lnppisu_static -lnppif_static -lnppc_static -lculibos -lfreeimage
 
 # Define directories
 SRC_DIR = src
 BIN_DIR = bin
 DATA_DIR = data
-LIB_DIR = lib
+LIB_DIR = libs
+
+SRC=$(SRC_DIR)/project.cpp
+TARGET=project
 
 # Define the default rule
-all: $(TARGET)
+all: build
+
+# Build rule
+build: $(TARGET)
+
+# Run rule
+run: $(TARGET)
+	cd $(BIN_DIR) && ./$(TARGET)
 
 # Rule for building the target executable
 $(TARGET): $(SRC)
 	mkdir -p $(BIN_DIR)
-	$(NVCC) $(CXXFLAGS) $(SRC) -o $(TARGET) $(LDFLAGS)
+	$(NVCC) $(CXXFLAGS) $(SRC) -o $(BIN_DIR)/$(TARGET) $(LDFLAGS)
 
 # Clean up
 clean:
@@ -59,5 +69,6 @@ clean:
 help:
 	@echo "Available make commands:"
 	@echo "  make        - Build the project."
+	@echo "  make run    - Build and run the project."
 	@echo "  make clean  - Clean up the build files."
 	@echo "  make help   - Display this help message."

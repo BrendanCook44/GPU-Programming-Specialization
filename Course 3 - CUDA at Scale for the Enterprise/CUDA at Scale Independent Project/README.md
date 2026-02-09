@@ -22,9 +22,8 @@ This file should hold the description of the project so that anyone cloning or d
 ```INSTALL```
 This file should hold the human-readable set of instructions for installing the code so that it can be executed. If possible it should be organized around different operating systems, so that it can be done by as many people as possible with different constraints.
 
-```Makefile or CMAkeLists.txt or build.sh```
+```Makefile```
 There should be some rudimentary scripts for building your project's code in an automatic fashion.
 
 ```run.sh```
 An optional script used to run your executable code, either with or without command-line arguments.
-
