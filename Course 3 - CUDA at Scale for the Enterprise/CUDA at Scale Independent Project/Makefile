@@ -34,7 +34,7 @@
 # Define the compiler and flags
 NVCC = /usr/local/cuda/bin/nvcc
 CXX = g++
-CXXFLAGS =  -std=c++11 -I/usr/local/cuda/include -I./include -I./libs -I./libs/UtilNPP -I./libs/GL
+CXXFLAGS =  -std=c++17 -I/usr/local/cuda/include -I./include -I./libs -I./libs/UtilNPP -I./libs/GL
 LDFLAGS = -L/usr/local/cuda/lib64 -L./libs/lib/x64 -lcudart -lnppc -lnppial -lnppicc -lnppidei -lnppif -lnppig -lnppim -lnppist -lnppisu -lnppitc -lnppisu_static -lnppif_static -lnppc_static -lculibos -lfreeimage
 
 # Define directories
