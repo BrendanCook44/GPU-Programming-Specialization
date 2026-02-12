@@ -40,6 +40,17 @@
 #include <string.h>
 #include <fstream>
 #include <iostream>
+#include <vector>
+#include <random>
+#include <chrono>
+
+#if defined(WIN32) || defined(_WIN32) || defined(WIN64) || defined(_WIN64)
+#include <filesystem>
+namespace fs = std::filesystem;
+#else
+#include <dirent.h>
+#include <sys/stat.h>
+#endif
 
 #include <cuda_runtime.h>
 #include <npp.h>
@@ -49,162 +60,281 @@
 
 bool printfNPPinfo(int argc, char *argv[])
 {
-    const NppLibraryVersion *libVer = nppGetLibVersion();
+       const NppLibraryVersion *libVer = nppGetLibVersion();
 
-    printf("NPP Library Version %d.%d.%d\n", libVer->major, libVer->minor,
-           libVer->build);
+       printf("NPP Library Version %d.%d.%d\n", libVer->major, libVer->minor,
+              libVer->build);
 
-    int driverVersion, runtimeVersion;
-    cudaDriverGetVersion(&driverVersion);
-    cudaRuntimeGetVersion(&runtimeVersion);
+       int driverVersion, runtimeVersion;
+       cudaDriverGetVersion(&driverVersion);
+       cudaRuntimeGetVersion(&runtimeVersion);
 
-    printf("  CUDA Driver  Version: %d.%d\n", driverVersion / 1000,
-           (driverVersion % 100) / 10);
-    printf("  CUDA Runtime Version: %d.%d\n", runtimeVersion / 1000,
-           (runtimeVersion % 100) / 10);
+       printf("  CUDA Driver  Version: %d.%d\n", driverVersion / 1000,
+              (driverVersion % 100) / 10);
+       printf("  CUDA Runtime Version: %d.%d\n", runtimeVersion / 1000,
+              (runtimeVersion % 100) / 10);
 
-    // Min spec is SM 1.0 devices
-    bool bVal = checkCudaCapabilities(1, 0);
-    return bVal;
+       // Min spec is SM 1.0 devices
+       bool bVal = checkCudaCapabilities(1, 0);
+       return bVal;
+}
+
+#if defined(WIN32) || defined(_WIN32) || defined(WIN64) || defined(_WIN64)
+// Windows implementation using std::filesystem
+void findAllPGMFiles(const std::string &directory, std::vector<std::string> &files)
+{
+       if (!fs::exists(directory))
+       {
+              std::cerr << "Directory does not exist: " << directory << std::endl;
+              return;
+       }
+
+       try
+       {
+              for (const auto &entry : fs::recursive_directory_iterator(directory))
+              {
+                     if (entry.is_regular_file())
+                     {
+                            std::string filename = entry.path().string();
+                            if (filename.length() >= 4 && filename.substr(filename.length() - 4) == ".pgm")
+                            {
+                                   files.push_back(filename);
+                            }
+                     }
+              }
+       }
+       catch (const fs::filesystem_error &e)
+       {
+              std::cerr << "Filesystem error: " << e.what() << std::endl;
+       }
+}
+#else
+// Linux implementation using dirent
+void findAllPGMFilesRecursive(const std::string &directory, std::vector<std::string> &files)
+{
+       DIR *dir = opendir(directory.c_str());
+       if (!dir)
+              return;
+
+       struct dirent *entry;
+       while ((entry = readdir(dir)) != nullptr)
+       {
+              std::string name = entry->d_name;
+              if (name == "." || name == "..")
+                     continue;
+
+              std::string fullPath = directory + "/" + name;
+
+              struct stat statbuf;
+              if (stat(fullPath.c_str(), &statbuf) == 0)
+              {
+                     if (S_ISDIR(statbuf.st_mode))
+                     {
+                            findAllPGMFilesRecursive(fullPath, files);
+                     }
+                     else if (S_ISREG(statbuf.st_mode))
+                     {
+                            if (name.length() >= 4 && name.substr(name.length() - 4) == ".pgm")
+                            {
+                                   files.push_back(fullPath);
+                            }
+                     }
+              }
+       }
+       closedir(dir);
+}
+
+void findAllPGMFiles(const std::string &directory, std::vector<std::string> &files)
+{
+       findAllPGMFilesRecursive(directory, files);
+}
+#endif
+
+std::string getOutputFilename(const std::string &inputFile, int augNumber)
+{
+       std::string result = inputFile;
+       std::string::size_type dot = result.rfind('.');
+
+       if (dot != std::string::npos)
+       {
+              result = result.substr(0, dot);
+       }
+
+       result += "_aug" + std::to_string(augNumber) + ".pgm";
+       return result;
+}
+
+void processImage(const std::string &inputFile, const std::string &outputDir,
+                  std::mt19937 &rng, int imageIndex)
+{
+       std::cout << "\nProcessing: " << inputFile << std::endl;
+
+       const int augmentationsPerImage = 3;
+
+       // Load the image
+       npp::ImageCPU_8u_C1 oHostSrc;
+       npp::loadImage(inputFile, oHostSrc);
+       npp::ImageNPP_8u_C1 oDeviceSrc(oHostSrc);
+
+       NppiSize oSrcSize = {(int)oDeviceSrc.width(), (int)oDeviceSrc.height()};
+       NppiRect oSrcROI = {0, 0, (int)oDeviceSrc.width(), (int)oDeviceSrc.height()};
+
+       // Random number distributions
+       std::uniform_real_distribution<double> angleDist(0.0, 360.0);
+       std::uniform_int_distribution<int> flipDist(0, 1);
+
+       for (int aug = 0; aug < augmentationsPerImage; aug++)
+       {
+              // Random rotation
+              double angle = angleDist(rng);
+              double nShiftX = 0.0;
+              double nShiftY = 0.0;
+
+              double aBoundingBox[2][2];
+              NPP_CHECK_NPP(nppiGetRotateBound(oSrcROI, aBoundingBox, angle, nShiftX, nShiftY));
+
+              int nWidth = (int)(aBoundingBox[1][0] - aBoundingBox[0][0]);
+              int nHeight = (int)(aBoundingBox[1][1] - aBoundingBox[0][1]);
+              NppiRect oDstROI = {0, 0, nWidth, nHeight};
+
+              npp::ImageNPP_8u_C1 oDeviceRotated(nWidth, nHeight);
+
+              NPP_CHECK_NPP(nppiRotate_8u_C1R(
+                  oDeviceSrc.data(), oSrcSize, oDeviceSrc.pitch(), oSrcROI,
+                  oDeviceRotated.data(), oDeviceRotated.pitch(), oDstROI, angle,
+                  nShiftX, nShiftY, NPPI_INTER_LINEAR));
+
+              // Random horizontal flip
+              bool doHFlip = flipDist(rng) == 1;
+              npp::ImageNPP_8u_C1 oDeviceFlipped(nWidth, nHeight);
+
+              if (doHFlip)
+              {
+                     NppiSize oFlipSize = {nWidth, nHeight};
+                     NPP_CHECK_NPP(nppiMirror_8u_C1R(
+                         oDeviceRotated.data(), oDeviceRotated.pitch(),
+                         oDeviceFlipped.data(), oDeviceFlipped.pitch(),
+                         oFlipSize, NPP_HORIZONTAL_AXIS));
+              }
+              else
+              {
+                     // Copy without flipping
+                     NppiSize oCopySize = {nWidth, nHeight};
+                     NPP_CHECK_NPP(nppiCopy_8u_C1R(
+                         oDeviceRotated.data(), oDeviceRotated.pitch(),
+                         oDeviceFlipped.data(), oDeviceFlipped.pitch(),
+                         oCopySize));
+              }
+
+              // Copy result to host and save
+              npp::ImageCPU_8u_C1 oHostDst(oDeviceFlipped.size());
+              oDeviceFlipped.copyTo(oHostDst.data(), oHostDst.pitch());
+
+              std::string outputFile = getOutputFilename(inputFile, imageIndex * augmentationsPerImage + aug);
+
+              saveImage(outputFile, oHostDst);
+              std::cout << "  Saved: " << outputFile << std::endl;
+
+              nppiFree(oDeviceRotated.data());
+              nppiFree(oDeviceFlipped.data());
+       }
+
+       nppiFree(oDeviceSrc.data());
 }
 
 int main(int argc, char *argv[])
 {
-    printf("%s Starting...\n\n", argv[0]);
+       printf("%s Starting...\n\n", argv[0]);
 
-    try
-    {
-        std::string sFilename;
-        char *filePath;
+       try
+       {
+              findCudaDevice(argc, (const char **)argv);
 
-        findCudaDevice(argc, (const char **)argv);
+              if (printfNPPinfo(argc, argv) == false)
+              {
+                     exit(EXIT_SUCCESS);
+              }
 
-        if (printfNPPinfo(argc, argv) == false)
-        {
-            exit(EXIT_SUCCESS);
-        }
+              // Determine input directory
+              std::string inputDir;
+              if (checkCmdLineFlag(argc, (const char **)argv, "input"))
+              {
+                     char *dirPath;
+                     getCmdLineArgumentString(argc, (const char **)argv, "input", &dirPath);
+                     inputDir = dirPath;
+              }
+              else
+              {
+                     inputDir = "../data/faces";
+              }
 
-        if (checkCmdLineFlag(argc, (const char **)argv, "input"))
-        {
-            getCmdLineArgumentString(argc, (const char **)argv, "input", &filePath);
-        }
-        else
-        {
-            filePath = sdkFindFilePath("Lena.pgm", argv[0]);
-        }
+              // Find all PGM files
+              std::vector<std::string> pgmFiles;
+              std::cout << "Searching for PGM files in: " << inputDir << std::endl;
+              findAllPGMFiles(inputDir, pgmFiles);
 
-        if (filePath)
-        {
-            sFilename = filePath;
-        }
-        else
-        {
-            sFilename = "Lena.pgm";
-        }
+              if (pgmFiles.empty())
+              {
+                     std::cerr << "No PGM files found in directory: " << inputDir << std::endl;
+                     std::cerr << "Make sure the directory exists and contains .pgm files (or subdirectories with .pgm files)." << std::endl;
+                     exit(EXIT_FAILURE);
+              }
 
-        // if we specify the filename at the command line, then we only test
-        // sFilename[0].
-        int file_errors = 0;
-        std::ifstream infile(sFilename.data(), std::ifstream::in);
+              std::cout << "\nFound " << pgmFiles.size() << " PGM files to process." << std::endl;
+              std::cout << "Generating synthetic training data with random rotations and flips...\n"
+                        << std::endl;
 
-        if (infile.good())
-        {
-            std::cout << "nppiRotate opened: <" << sFilename.data()
-                      << "> successfully!" << std::endl;
-            file_errors = 0;
-            infile.close();
-        }
-        else
-        {
-            std::cout << "nppiRotate unable to open: <" << sFilename.data() << ">"
-                      << std::endl;
-            file_errors++;
-            infile.close();
-        }
+              // Initialize random number generator
+              unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+              std::mt19937 rng(seed);
 
-        if (file_errors > 0)
-        {
-            exit(EXIT_FAILURE);
-        }
+              // Process each image
+              int processedCount = 0;
+              for (size_t i = 0; i < pgmFiles.size(); i++)
+              {
+                     try
+                     {
+                            processImage(pgmFiles[i], inputDir, rng, i);
+                            processedCount++;
+                     }
+                     catch (npp::Exception &rException)
+                     {
+                            std::cerr << "Error processing " << pgmFiles[i] << ": "
+                                      << rException << std::endl;
+                            continue;
+                     }
+                     catch (...)
+                     {
+                            std::cerr << "Unknown error processing " << pgmFiles[i] << std::endl;
+                            continue;
+                     }
+              }
 
-        std::string sResultFilename = sFilename;
+              std::cout << "\n========================================" << std::endl;
+              std::cout << "Processing complete!" << std::endl;
+              std::cout << "Processed " << processedCount << " images." << std::endl;
+              std::cout << "Generated " << (processedCount * 3) << " augmented images." << std::endl;
+              std::cout << "========================================\n"
+                        << std::endl;
 
-        std::string::size_type dot = sResultFilename.rfind('.');
+              exit(EXIT_SUCCESS);
+       }
+       catch (npp::Exception &rException)
+       {
+              std::cerr << "Program error! The following exception occurred: \n";
+              std::cerr << rException << std::endl;
+              std::cerr << "Aborting." << std::endl;
 
-        if (dot != std::string::npos)
-        {
-            sResultFilename = sResultFilename.substr(0, dot);
-        }
+              exit(EXIT_FAILURE);
+       }
+       catch (...)
+       {
+              std::cerr << "Program error! An unknown type of exception occurred. \n";
+              std::cerr << "Aborting." << std::endl;
 
-        sResultFilename += "_rotate.pgm";
+              exit(EXIT_FAILURE);
+              return -1;
+       }
 
-        if (checkCmdLineFlag(argc, (const char **)argv, "output"))
-        {
-            char *outputFilePath;
-            getCmdLineArgumentString(argc, (const char **)argv, "output",
-                                     &outputFilePath);
-            sResultFilename = outputFilePath;
-        }
-
-        // declare a host image object for an 8-bit grayscale image
-        npp::ImageCPU_8u_C1 oHostSrc;
-        // load gray-scale image from disk
-        npp::loadImage(sFilename, oHostSrc);
-        // declare a device image and copy construct from the host image,
-        // i.e. upload host to device
-        npp::ImageNPP_8u_C1 oDeviceSrc(oHostSrc);
-
-        // create struct with the ROI size
-        NppiSize oSrcSize = {(int)oDeviceSrc.width(), (int)oDeviceSrc.height()};
-        NppiPoint oSrcOffset = {0, 0};
-        NppiSize oSizeROI = {(int)oDeviceSrc.width(), (int)oDeviceSrc.height()};
-
-        // Calculate the bounding box of the rotated image
-        NppiRect oBoundingBox;
-        double angle = 45.0; // Rotation angle in degrees
-        NPP_CHECK_NPP(nppiGetRotateBound(oSrcSize, angle, &oBoundingBox));
-
-        // allocate device image for the rotated image
-        npp::ImageNPP_8u_C1 oDeviceDst(oBoundingBox.width, oBoundingBox.height);
-
-        // Set the rotation point (center of the image)
-        NppiPoint oRotationCenter = {(int)(oSrcSize.width / 2), (int)(oSrcSize.height / 2)};
-
-        // run the rotation
-        NPP_CHECK_NPP(nppiRotate_8u_C1R(
-            oDeviceSrc.data(), oSrcSize, oDeviceSrc.pitch(), oSrcOffset,
-            oDeviceDst.data(), oDeviceDst.pitch(), oBoundingBox, angle, oRotationCenter,
-            NPPI_INTER_NN));
-
-        // declare a host image for the result
-        npp::ImageCPU_8u_C1 oHostDst(oDeviceDst.size());
-        // and copy the device result data into it
-        oDeviceDst.copyTo(oHostDst.data(), oHostDst.pitch());
-
-        saveImage(sResultFilename, oHostDst);
-        std::cout << "Saved image: " << sResultFilename << std::endl;
-
-        nppiFree(oDeviceSrc.data());
-        nppiFree(oDeviceDst.data());
-
-        exit(EXIT_SUCCESS);
-    }
-    catch (npp::Exception &rException)
-    {
-        std::cerr << "Program error! The following exception occurred: \n";
-        std::cerr << rException << std::endl;
-        std::cerr << "Aborting." << std::endl;
-
-        exit(EXIT_FAILURE);
-    }
-    catch (...)
-    {
-        std::cerr << "Program error! An unknown type of exception occurred. \n";
-        std::cerr << "Aborting." << std::endl;
-
-        exit(EXIT_FAILURE);
-        return -1;
-    }
-
-    return 0;
+       return 0;
 }
