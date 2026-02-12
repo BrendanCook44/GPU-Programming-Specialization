@@ -230,7 +230,7 @@ void processImage(const std::string &inputFile, const std::string &outputDir,
               npp::ImageCPU_8u_C1 oHostDst(oDeviceFlipped.size());
               oDeviceFlipped.copyTo(oHostDst.data(), oHostDst.pitch());
 
-              std::string outputFile = getOutputFilename(inputFile, imageIndex * augmentationsPerImage + aug);
+              std::string outputFile = getOutputFilename(inputFile, aug);
 
               saveImage(outputFile, oHostDst);
               std::cout << "  Saved: " << outputFile << std::endl;
