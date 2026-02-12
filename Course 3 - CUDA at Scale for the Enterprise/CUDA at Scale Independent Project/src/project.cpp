@@ -169,27 +169,20 @@ void processImage(const std::string &inputFile, const std::string &outputDir,
 {
        std::cout << "\nProcessing: " << inputFile << std::endl;
 
-       const int augmentationsPerImage = 3;
+       const int augmentationsPerImage = 2;
 
        // Load the image
        npp::ImageCPU_8u_C1 oHostSrc;
        npp::loadImage(inputFile, oHostSrc);
        npp::ImageNPP_8u_C1 oDeviceSrc(oHostSrc);
 
-       NppiSize oSrcSize = {(int)oDeviceSrc.width(), (int)oDeviceSrc.height()};
-       NppiRect oSrcROI = {0, 0, (int)oDeviceSrc.width(), (int)oDeviceSrc.height()};
-
-       // Random number distribution for flip direction
-       std::uniform_int_distribution<int> flipDist(0, 2); // 0=none, 1=horizontal, 2=vertical
+       NppiSize oSize = {(int)oDeviceSrc.width(), (int)oDeviceSrc.height()};
 
        for (int aug = 0; aug < augmentationsPerImage; aug++)
        {
-              int flipType = flipDist(rng);
-              
               npp::ImageNPP_8u_C1 oDeviceResult(oDeviceSrc.width(), oDeviceSrc.height());
-              NppiSize oSize = {(int)oDeviceSrc.width(), (int)oDeviceSrc.height()};
 
-              if (flipType == 1)
+              if (aug == 0)
               {
                      // Horizontal flip
                      NPP_CHECK_NPP(nppiMirror_8u_C1R(
@@ -197,21 +190,13 @@ void processImage(const std::string &inputFile, const std::string &outputDir,
                          oDeviceResult.data(), oDeviceResult.pitch(),
                          oSize, NPP_HORIZONTAL_AXIS));
               }
-              else if (flipType == 2)
+              else
               {
                      // Vertical flip
                      NPP_CHECK_NPP(nppiMirror_8u_C1R(
                          oDeviceSrc.data(), oDeviceSrc.pitch(),
                          oDeviceResult.data(), oDeviceResult.pitch(),
                          oSize, NPP_VERTICAL_AXIS));
-              }
-              else
-              {
-                     // No flip - just copy
-                     NPP_CHECK_NPP(nppiCopy_8u_C1R(
-                         oDeviceSrc.data(), oDeviceSrc.pitch(),
-                         oDeviceResult.data(), oDeviceResult.pitch(),
-                         oSize));
               }
 
               // Copy result to host and save
@@ -268,7 +253,7 @@ int main(int argc, char *argv[])
               }
 
               std::cout << "\nFound " << pgmFiles.size() << " PGM files to process." << std::endl;
-              std::cout << "Generating synthetic training data with random rotations and flips...\n"
+              std::cout << "Generating synthetic training data with horizontal and vertical flips...\n"
                         << std::endl;
 
               // Initialize random number generator
@@ -300,7 +285,7 @@ int main(int argc, char *argv[])
               std::cout << "\n========================================" << std::endl;
               std::cout << "Processing complete!" << std::endl;
               std::cout << "Processed " << processedCount << " images." << std::endl;
-              std::cout << "Generated " << (processedCount * 3) << " augmented images." << std::endl;
+              std::cout << "Generated " << (processedCount * 2) << " augmented images." << std::endl;
               std::cout << "========================================\n"
                         << std::endl;
 
