@@ -179,64 +179,51 @@ void processImage(const std::string &inputFile, const std::string &outputDir,
        NppiSize oSrcSize = {(int)oDeviceSrc.width(), (int)oDeviceSrc.height()};
        NppiRect oSrcROI = {0, 0, (int)oDeviceSrc.width(), (int)oDeviceSrc.height()};
 
-       // Random number distributions
-       std::uniform_real_distribution<double> angleDist(0.0, 360.0);
-       std::uniform_int_distribution<int> flipDist(0, 1);
+       // Random number distribution for flip direction
+       std::uniform_int_distribution<int> flipDist(0, 2); // 0=none, 1=horizontal, 2=vertical
 
        for (int aug = 0; aug < augmentationsPerImage; aug++)
        {
-              // Random rotation
-              double angle = angleDist(rng);
+              int flipType = flipDist(rng);
               
-              // Rotate in place - keep same dimensions as source
-              int nWidth = oSrcROI.width;
-              int nHeight = oSrcROI.height;
-              NppiRect oDstROI = {0, 0, nWidth, nHeight};
-              
-              // Shift to rotate around center
-              double nShiftX = (oSrcROI.width - 1) / 2.0;
-              double nShiftY = (oSrcROI.height - 1) / 2.0;
+              npp::ImageNPP_8u_C1 oDeviceResult(oDeviceSrc.width(), oDeviceSrc.height());
+              NppiSize oSize = {(int)oDeviceSrc.width(), (int)oDeviceSrc.height()};
 
-              npp::ImageNPP_8u_C1 oDeviceRotated(nWidth, nHeight);
-
-              NPP_CHECK_NPP(nppiRotate_8u_C1R(
-                  oDeviceSrc.data(), oSrcSize, oDeviceSrc.pitch(), oSrcROI,
-                  oDeviceRotated.data(), oDeviceRotated.pitch(), oDstROI, angle,
-                  nShiftX, nShiftY, NPPI_INTER_LINEAR));
-
-              // Random horizontal flip
-              bool doHFlip = flipDist(rng) == 1;
-              npp::ImageNPP_8u_C1 oDeviceFlipped(nWidth, nHeight);
-
-              if (doHFlip)
+              if (flipType == 1)
               {
-                     NppiSize oFlipSize = {nWidth, nHeight};
+                     // Horizontal flip
                      NPP_CHECK_NPP(nppiMirror_8u_C1R(
-                         oDeviceRotated.data(), oDeviceRotated.pitch(),
-                         oDeviceFlipped.data(), oDeviceFlipped.pitch(),
-                         oFlipSize, NPP_HORIZONTAL_AXIS));
+                         oDeviceSrc.data(), oDeviceSrc.pitch(),
+                         oDeviceResult.data(), oDeviceResult.pitch(),
+                         oSize, NPP_HORIZONTAL_AXIS));
+              }
+              else if (flipType == 2)
+              {
+                     // Vertical flip
+                     NPP_CHECK_NPP(nppiMirror_8u_C1R(
+                         oDeviceSrc.data(), oDeviceSrc.pitch(),
+                         oDeviceResult.data(), oDeviceResult.pitch(),
+                         oSize, NPP_VERTICAL_AXIS));
               }
               else
               {
-                     // Copy without flipping
-                     NppiSize oCopySize = {nWidth, nHeight};
+                     // No flip - just copy
                      NPP_CHECK_NPP(nppiCopy_8u_C1R(
-                         oDeviceRotated.data(), oDeviceRotated.pitch(),
-                         oDeviceFlipped.data(), oDeviceFlipped.pitch(),
-                         oCopySize));
+                         oDeviceSrc.data(), oDeviceSrc.pitch(),
+                         oDeviceResult.data(), oDeviceResult.pitch(),
+                         oSize));
               }
 
               // Copy result to host and save
-              npp::ImageCPU_8u_C1 oHostDst(oDeviceFlipped.size());
-              oDeviceFlipped.copyTo(oHostDst.data(), oHostDst.pitch());
+              npp::ImageCPU_8u_C1 oHostDst(oDeviceResult.size());
+              oDeviceResult.copyTo(oHostDst.data(), oHostDst.pitch());
 
               std::string outputFile = getOutputFilename(inputFile, aug);
 
               saveImage(outputFile, oHostDst);
               std::cout << "  Saved: " << outputFile << std::endl;
 
-              nppiFree(oDeviceRotated.data());
-              nppiFree(oDeviceFlipped.data());
+              nppiFree(oDeviceResult.data());
        }
 
        nppiFree(oDeviceSrc.data());
