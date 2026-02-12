@@ -187,15 +187,15 @@ void processImage(const std::string &inputFile, const std::string &outputDir,
        {
               // Random rotation
               double angle = angleDist(rng);
-              double nShiftX = 0.0;
-              double nShiftY = 0.0;
-
-              double aBoundingBox[2][2];
-              NPP_CHECK_NPP(nppiGetRotateBound(oSrcROI, aBoundingBox, angle, nShiftX, nShiftY));
-
-              int nWidth = (int)(aBoundingBox[1][0] - aBoundingBox[0][0]);
-              int nHeight = (int)(aBoundingBox[1][1] - aBoundingBox[0][1]);
+              
+              // Rotate in place - keep same dimensions as source
+              int nWidth = oSrcROI.width;
+              int nHeight = oSrcROI.height;
               NppiRect oDstROI = {0, 0, nWidth, nHeight};
+              
+              // Shift to rotate around center
+              double nShiftX = (oSrcROI.width - 1) / 2.0;
+              double nShiftY = (oSrcROI.height - 1) / 2.0;
 
               npp::ImageNPP_8u_C1 oDeviceRotated(nWidth, nHeight);
 
