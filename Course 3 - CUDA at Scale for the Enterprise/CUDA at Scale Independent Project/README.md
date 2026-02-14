@@ -41,6 +41,3 @@ Installation instructions for setting up the project in the Coursera lab environ
 
 ```Makefile```
 Build configuration using NVCC compiler with C++17 standard. Compiles CUDA/C++ code and links against NPP and FreeImage libraries.
-
-```run.sh```
-Bash script to clean, build, and execute the project with command-line arguments.
