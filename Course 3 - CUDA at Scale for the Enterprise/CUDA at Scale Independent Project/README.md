@@ -41,7 +41,7 @@ make run
 
 After running the program, navigate to the `data/faces` folder to see the augmented images. The transformed images will be marked with `_aug` to indicate augmentation.
 
-To view the images, download them and open them in a PGM file viewer to see the image modifications. An example output is provided under `data/output results/` that shows an original unmodified image and the augmented versions of the image for visualization.
+To view the images, download them and open them in a PGM file viewer to see the image modifications. An example output is provided under `data/output results/` that shows an original unmodified image and the augmented versions of the image for visualization of program output.
 
 ## Code Organization
 
