@@ -14,6 +14,35 @@ This project uses NVIDIA's CUDA and NPP (NVIDIA Performance Primitives) library 
 
 **Use Case:** Data augmentation for face detection and recognition model training, significantly expanding training datasets without requiring additional data collection.
 
+## Installation
+
+From the Coursera lab environment, clone the repository using the following command:
+
+```bash
+git clone https://github.com/BrendanCook44/GPU-Programming-Specialization.git
+```
+
+Navigate to the project directory:
+
+```bash
+cd "GPU-Programming-Specialization/Course 3 - CUDA at Scale for the Enterprise/CUDA at Scale Independent Project"
+```
+
+## Running the Application
+
+To execute the application, run the following commands from inside the CUDA at Scale Independent Project folder:
+
+```bash
+make clean build
+make run
+```
+
+## Viewing Results
+
+After running the program, navigate to the `data/faces` folder to see the augmented images. The transformed images will be marked with `_aug` to indicate augmentation.
+
+To view the images, download them and open them in a PGM file viewer to see the image modifications. An example output is provided under `data/output results/` that shows the original unmodified image and the augmented versions of the image.
+
 ## Code Organization
 
 ```bin/```
