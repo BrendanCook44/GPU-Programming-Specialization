@@ -23,7 +23,9 @@ git clone https://github.com/BrendanCook44/GPU-Programming-Specialization.git
 Navigate to the project directory:
 
 ```bash
-cd "GPU-Programming-Specialization/Course 3 - CUDA at Scale for the Enterprise/CUDA at Scale Independent Project"
+cd GPU-Programming-Specialization/
+cd Course\ 3\ -\ CUDA\ at\ Scale\ for\ the\ Enterprise/
+cd CUDA\ at\ Scale\ Independent\ Project/
 ```
 
 ## Running the Application
