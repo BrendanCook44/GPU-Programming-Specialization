@@ -1,0 +1,1 @@
+wget http://archive.ics.uci.edu/ml/machine-learning-databases/faces-mld/faces.tar.gz -P data/
