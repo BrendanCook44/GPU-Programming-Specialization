@@ -2,7 +2,7 @@
 
 ## Overview
 
-This project uses NVIDIA's CUDA and NPP (NVIDIA Performance Primitives) library to generate synthetic training data from the CMU Face Images dataset provided by the UC Irvine Machine Learning Repository. The application performs GPU-accelerated image transformations to each image in the dataset to augment face image datasets for training machine learning models. This project can easily be expanded to include other NPP image transformation operations for additional data augmentation capabilities.
+This project uses NVIDIA's CUDA and NPP (NVIDIA Performance Primitives) library to generate synthetic training data from the CMU Face Images dataset provided by the UC Irvine Machine Learning Repository. The application performs GPU-accelerated image transformations to each image in the dataset to augment face image datasets for training machine learning models. This project can easily be expanded to include other file types and NPP image transformation operations.
 
 **Key Features:**
 - Batch processing of all PGM images in the CMU Face dataset
