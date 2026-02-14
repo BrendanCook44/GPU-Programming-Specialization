@@ -65,8 +65,5 @@ Source code for the image augmentation pipeline:
 ```README.md```
 Project documentation describing the face dataset augmentation system, its features, and usage instructions.
 
-```INSTALL```
-Installation instructions for setting up the project in the Coursera lab environment for peer review.
-
 ```Makefile```
 Build configuration using NVCC compiler with C++17 standard. Compiles CUDA/C++ code and links against NPP and FreeImage libraries.
