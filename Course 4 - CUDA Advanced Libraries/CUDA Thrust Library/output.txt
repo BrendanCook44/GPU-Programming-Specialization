@@ -1,0 +1,18 @@
+>>> GCC Version is greater or equal to 5.1.0 <<<
+./thrustSort.exe
+./thrustSort.exe Starting...
+
+MapSMtoCores for SM 8.9 is undefined.  Default to use 128 Cores/SM
+GPU Device 0: "NVIDIA L4" with compute capability 8.9
+
+Iteration sorted data successfully.
+Iteration sorted data successfully.
+Iteration sorted data successfully.
+Iteration sorted data successfully.
+Iteration sorted data successfully.
+Iteration sorted data successfully.
+Iteration sorted data successfully.
+Iteration sorted data successfully.
+Iteration sorted data successfully.
+Iteration sorted data successfully.
+radixSortThrust, Throughput = 3.1670 MElements/s, Time = 0.00032 s, Size = 1024 elements
