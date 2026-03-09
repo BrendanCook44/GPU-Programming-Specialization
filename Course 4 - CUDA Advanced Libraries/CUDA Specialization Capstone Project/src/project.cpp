@@ -87,7 +87,7 @@ int main(int argc, char *argv[])
               exit(EXIT_SUCCESS);
        }
 
-       printf("CUDA Device has minimum compute capability 1.0.\n");
+       printf("CUDA Device meets minimum requirements.\n");
        
 
        return 0;
