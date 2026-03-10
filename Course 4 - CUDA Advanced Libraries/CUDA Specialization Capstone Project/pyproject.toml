@@ -6,7 +6,8 @@ readme = "README.md"
 requires-python = ">=3.8"
 dependencies = [
     "pandas",
-    "tensorflow-gpu"
+    "tensorflow-gpu==2.10.0",
+    "tensorflow-io-gcs-filesystem==0.27.0",
 ]
 
 [dependency-groups]
