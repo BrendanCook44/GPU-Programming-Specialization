@@ -2,7 +2,7 @@
 
 ## Overview
 
-This project uses NVIDIA's cuDNN library to train a neural network to do xyz.
+This project uses Tensorflow with cuDNN for GPU Acceleration to train a Neural Network to recognize planetary objects in space.
 
 **Key Features:**
 
