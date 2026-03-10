@@ -5,12 +5,6 @@ set -e
 # Add pip scripts to PATH so uv commands are available
 export PATH="$HOME/.local/bin:$PATH"
 
-# Persist PATH to ~/.bashrc so uv is available in all terminal sessions
-if ! grep -q 'export PATH="$HOME/.local/bin:$PATH"' ~/.bashrc; then
-    echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
-fi
-source ~/.bashrc
-
 echo "========================================="
 echo " Setting up UV Project"
 echo "========================================="
