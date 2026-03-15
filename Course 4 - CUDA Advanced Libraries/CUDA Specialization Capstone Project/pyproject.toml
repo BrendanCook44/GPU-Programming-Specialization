@@ -17,10 +17,5 @@ dev = [
     "pytest",
 ]
 
-[tool.pytest.ini_options]
-pythonpath = [
-  "."
-]
-
 [tool.setuptools]
 packages = ["capstone-project-gpu-specialization"]
