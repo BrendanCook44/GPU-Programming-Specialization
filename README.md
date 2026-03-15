@@ -4,8 +4,8 @@ Contains all of the assignments & projects taken for the GPU Programming Special
 
 ## For Graders
 
-If you are here to grade the Independent Project, navigate to the following directory:
+If you are here to grade the Capstone Project, navigate to the following directory:
 
-**Course 3 - CUDA at Scale for the Enterprise** → **CUDA at Scale Independent Project**
+**Course 4 - CUDA Advanced Libraries** → **CUDA Specialization Capstone Project**
 
-The README inside of the CUDA at Scale Independent Project folder will provide further documentation.
+The README inside of the CUDA Specialization Capstone Project folder will provide further documentation.
