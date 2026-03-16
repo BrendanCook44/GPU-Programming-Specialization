@@ -25,7 +25,10 @@ if os.path.exists(cudnn_lib):
         os.environ["LD_LIBRARY_PATH"] = cudnn_lib + ":" + current_ld
         os.execv(sys.executable, [sys.executable] + sys.argv)
 
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+
 import tensorflow as tf
+tf.get_logger().setLevel('ERROR')
 
 IMG_SIZE = (128, 128)
 
@@ -38,20 +41,50 @@ TRAIN_SCRIPT = os.path.join(PROJECT_ROOT, "src", "model", "train_model.py")
 SUPPORTED_EXTENSIONS = (".jpg", ".jpeg", ".png")
 
 
+def is_valid_image(filepath):
+    """Check file magic bytes to verify it's actually JPEG, PNG, GIF, or BMP."""
+    try:
+        with open(filepath, "rb") as f:
+            header = f.read(12)
+        if len(header) < 4:
+            return False
+        if header[:3] == b'\xff\xd8\xff':
+            return True
+        if header[:4] == b'\x89PNG':
+            return True
+        if header[:3] == b'GIF':
+            return True
+        if header[:2] == b'BM':
+            return True
+        return False
+    except (IOError, OSError):
+        return False
+
+
 def collect_images(directory):
     """Recursively find all image files under a directory."""
     image_paths = []
+    skipped = []
     for dirpath, _, filenames in os.walk(directory):
         for fname in sorted(filenames):
             if fname.lower().endswith(SUPPORTED_EXTENSIONS):
-                image_paths.append(os.path.join(dirpath, fname))
+                fpath = os.path.join(dirpath, fname)
+                if is_valid_image(fpath):
+                    image_paths.append(fpath)
+                else:
+                    skipped.append(fpath)
+    if skipped:
+        print(f"Skipped {len(skipped)} file(s) with invalid format:")
+        for s in skipped:
+            print(f"  - {os.path.basename(s)}")
     return image_paths
 
 
 def classify_image(model, image_path):
     """Run inference on a single image. Returns (label, confidence)."""
     raw = tf.io.read_file(image_path)
-    img = tf.image.decode_jpeg(raw, channels=3)
+    img = tf.image.decode_image(raw, channels=3, expand_animations=False)
+    img.set_shape([None, None, 3])
     img = tf.image.resize(img, IMG_SIZE) / 255.0
     img = tf.expand_dims(img, 0)
 

@@ -16,11 +16,15 @@ import numpy as np
 import tensorflow as tf
 from tensorflow.keras import layers, models, callbacks
 
+# Suppress noisy PNG iCCP warnings and TF info messages
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+tf.get_logger().setLevel('ERROR')
+
 # ---------------------------------------------------------------------------
 # Config
 # ---------------------------------------------------------------------------
 IMG_SIZE = (128, 128)
-BATCH_SIZE = 32
+BATCH_SIZE = 16
 EPOCHS = 30
 VALIDATION_SPLIT = 0.2
 SEED = 42
@@ -88,10 +92,35 @@ def verify_gpu():
 def load_image(path, label):
     """Read, decode, and preprocess a single image."""
     raw = tf.io.read_file(path)
-    img = tf.image.decode_jpeg(raw, channels=3)
+    img = tf.image.decode_image(raw, channels=3, expand_animations=False)
+    img.set_shape([None, None, 3])
     img = tf.image.resize(img, IMG_SIZE)
     img = img / 255.0
     return img, label
+
+
+def is_valid_image(filepath):
+    """Check file magic bytes to verify it's actually JPEG, PNG, GIF, or BMP."""
+    try:
+        with open(filepath, "rb") as f:
+            header = f.read(12)
+        if len(header) < 4:
+            return False
+        # JPEG: FF D8 FF
+        if header[:3] == b'\xff\xd8\xff':
+            return True
+        # PNG: 89 50 4E 47
+        if header[:4] == b'\x89PNG':
+            return True
+        # GIF: GIF87a or GIF89a
+        if header[:3] == b'GIF':
+            return True
+        # BMP: BM
+        if header[:2] == b'BM':
+            return True
+        return False
+    except (IOError, OSError):
+        return False
 
 
 def gather_paths_and_labels(root_dir):
@@ -99,17 +128,29 @@ def gather_paths_and_labels(root_dir):
 
     Everything under <root>/Positive/* → label 1
     Everything under <root>/Negative/* → label 0
+    Validates each file's actual format (not just extension).
     """
     paths, labels = [], []
+    skipped = []
     for label_name, label_val in [("Positive", 1), ("Negative", 0)]:
         class_dir = os.path.join(root_dir, label_name)
         if not os.path.isdir(class_dir):
             continue
         for dirpath, _, filenames in os.walk(class_dir):
             for fname in filenames:
-                if fname.lower().endswith((".jpg", ".jpeg", ".png")):
-                    paths.append(os.path.join(dirpath, fname))
-                    labels.append(label_val)
+                if fname.lower().endswith((".jpg", ".jpeg", ".png", ".gif", ".bmp")):
+                    fpath = os.path.join(dirpath, fname)
+                    if is_valid_image(fpath):
+                        paths.append(fpath)
+                        labels.append(label_val)
+                    else:
+                        skipped.append(fpath)
+    if skipped:
+        print(f"  WARNING: Skipped {len(skipped)} file(s) with invalid format:")
+        for s in skipped[:10]:
+            print(f"    - {s}")
+        if len(skipped) > 10:
+            print(f"    ... and {len(skipped) - 10} more")
     return paths, labels
 
 
@@ -159,7 +200,7 @@ def build_model():
         layers.MaxPooling2D(),
 
         layers.GlobalAveragePooling2D(),
-        layers.Dense(128, activation="relu"),
+        layers.Dense(64, activation="relu"),
         layers.Dropout(0.5),
         layers.Dense(1, activation="sigmoid"),
     ])
@@ -178,9 +219,7 @@ def build_model():
 def train():
     verify_gpu()
 
-    # Enable device placement logging so output proves GPU is used
-    tf.debugging.set_log_device_placement(True)
-    print("\nDevice placement logging enabled — ops will show GPU:0 in output.\n")
+    print()
 
     # Gather training data
     paths, labels = gather_paths_and_labels(TRAINING_DIR)
@@ -240,9 +279,6 @@ def train():
         callbacks=cb,
     )
 
-    # Disable verbose device logging for save/eval
-    tf.debugging.set_log_device_placement(False)
-
     # Save
     model.save(MODEL_SAVE_PATH)
     print(f"\nModel saved to {MODEL_SAVE_PATH}")
@@ -261,7 +297,8 @@ def predict(image_path, model_path=MODEL_SAVE_PATH):
     """Load model and predict on a single image. Returns (label, confidence)."""
     model = tf.keras.models.load_model(model_path)
     raw = tf.io.read_file(image_path)
-    img = tf.image.decode_jpeg(raw, channels=3)
+    img = tf.image.decode_image(raw, channels=3, expand_animations=False)
+    img.set_shape([None, None, 3])
     img = tf.image.resize(img, IMG_SIZE) / 255.0
     img = tf.expand_dims(img, 0)
 
