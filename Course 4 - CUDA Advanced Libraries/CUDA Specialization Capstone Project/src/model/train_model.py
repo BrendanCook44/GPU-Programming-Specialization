@@ -24,7 +24,7 @@ tf.get_logger().setLevel('ERROR')
 # Config
 # ---------------------------------------------------------------------------
 IMG_SIZE = (256, 256)
-BATCH_SIZE = 16
+BATCH_SIZE = 32
 EPOCHS = 8
 VALIDATION_SPLIT = 0.2
 SEED = 42
