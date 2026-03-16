@@ -24,8 +24,8 @@ Navigate to the project directory:
 
 ```bash
 cd GPU-Programming-Specialization/
-cd Course\ 3\ -\ CUDA\ at\ Scale\ for\ the\ Enterprise/
-cd CUDA\ at\ Scale\ Independent\ Project/
+cd Course\ 4\ -\ CUDA\ Advanced\ Libraries/
+cd CUDA\ Specialization\ Capstone\ Project/
 ```
 
 ## Running the Application
