@@ -29,7 +29,7 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, "..", ".."))
 DATA_DIR = os.path.join(PROJECT_ROOT, "data")
 TRAINING_DIR = os.path.join(DATA_DIR, "Training")
-TEST_DIR = os.path.join(DATA_DIR, "Test")
+TEST_DIR = os.path.join(DATA_DIR, "Application")
 MODEL_SAVE_PATH = os.path.join(PROJECT_ROOT, "src", "model", "planetary_detector.keras")
 
 

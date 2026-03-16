@@ -32,7 +32,7 @@ IMG_SIZE = (128, 128)
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, ".."))
 DEFAULT_MODEL_PATH = os.path.join(PROJECT_ROOT, "src", "model", "planetary_detector.keras")
-DEFAULT_TEST_DIR = os.path.join(PROJECT_ROOT, "data", "Test")
+DEFAULT_TEST_DIR = os.path.join(PROJECT_ROOT, "data", "Application")
 TRAIN_SCRIPT = os.path.join(PROJECT_ROOT, "src", "model", "train_model.py")
 
 SUPPORTED_EXTENSIONS = (".jpg", ".jpeg", ".png")
