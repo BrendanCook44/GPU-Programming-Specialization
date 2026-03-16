@@ -343,6 +343,17 @@ paket-files/
 **/__pycache__/
 *.pyc
 
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
 # Cake - Uncomment if you are using it
 #tools/**
 #!tools/packages.config

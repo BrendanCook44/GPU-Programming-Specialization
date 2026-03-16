@@ -5,8 +5,12 @@
 This project uses Tensorflow with cuDNN for GPU Acceleration to train a Neural Network to recognize planetary objects in space.
 
 **Key Features:**
+- GPU-accelerated neural network training using TensorFlow with cuDNN
+- Binary classification model trained to detect planetary objects in images
+- Evaluated against a large secondary dataset of telescope-captured space objects
 
 **Use Case:**
+A neural network is trained on a labeled dataset of planetary images using TensorFlow to detect whether a planetary object is present in a given image. A secondary dataset containing thousands of space objects captured via telescope is then used to test the model and classify planetary objects among the broader collection of space imagery.
 
 ## Installation
 
@@ -20,8 +24,8 @@ Navigate to the project directory:
 
 ```bash
 cd GPU-Programming-Specialization/
-cd Course\ 3\ -\ CUDA\ at\ Scale\ for\ the\ Enterprise/
-cd CUDA\ at\ Scale\ Independent\ Project/
+cd Course\ 4\ -\ CUDA\ Advanced\ Libraries/
+cd CUDA\ Specialization\ Capstone\ Project/
 ```
 
 ## Running the Application
