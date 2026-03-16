@@ -30,7 +30,7 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 import tensorflow as tf
 tf.get_logger().setLevel('ERROR')
 
-IMG_SIZE = (128, 128)
+IMG_SIZE = (256, 256)
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, ".."))
