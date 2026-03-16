@@ -116,22 +116,21 @@ int  main (int argc, char** argv) {
     // Create random number generator seeded with current system time
     std::mt19937 r(static_cast<unsigned int>(std::time(nullptr)));
     std::uniform_real_distribution<float> dist(0.0f, 1.0f);
-    // TODO create arrays of floats C filled with random value
+    // TODO create arrays of floats A, B, C filled with random value
+    
+    for (int i = 0; i < HA * WA; i++)
+    {
+      A[i] = dist(r);
+    }
+
+    for (int i = 0; i < HB * WB; i++)
+    {
+      B[i] = dist(r);
+    }
+
     for (int i = 0; i < HC * WC; i++)
     {
       C[i] = dist(r);
-    }
-
-    // TODO create arrays of floats alpha filled with 1's
-    for (int i = 0; i < HA * WA; i++)
-    {
-      A[i] = 1;
-    }
-
-    // TODO create arrays of floats beta filled with 0's
-    for (int i = 0; i < HB * WB; i++)
-    {
-      B[i] = 0;
     }
 
     // TODO use initializeDeviceMemoryFromHostMemory to create AA from matrix A
