@@ -30,9 +30,10 @@ import tensorflow as tf
 IMG_SIZE = (128, 128)
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-PROJECT_ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, "..", ".."))
+PROJECT_ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, ".."))
 DEFAULT_MODEL_PATH = os.path.join(PROJECT_ROOT, "src", "model", "planetary_detector.keras")
 DEFAULT_TEST_DIR = os.path.join(PROJECT_ROOT, "data", "Test")
+TRAIN_SCRIPT = os.path.join(PROJECT_ROOT, "src", "model", "train_model.py")
 
 SUPPORTED_EXTENSIONS = (".jpg", ".jpeg", ".png")
 
@@ -68,11 +69,18 @@ def run(test_dir, model_path):
         tf.config.experimental.set_memory_growth(gpu, True)
     print(f"Running inference on: {'GPU' if gpus else 'CPU'}\n")
 
-    # Load model
+    # Load model — train first if it doesn't exist
     if not os.path.exists(model_path):
-        print(f"ERROR: Model not found at {model_path}")
-        print("Train the model first:  python src/model/train_model.py")
-        sys.exit(1)
+        print(f"Model not found at {model_path}")
+        print(f"Running training script: {TRAIN_SCRIPT}\n")
+        import subprocess
+        result = subprocess.run([sys.executable, TRAIN_SCRIPT])
+        if result.returncode != 0:
+            print("ERROR: Training failed. Cannot proceed.")
+            sys.exit(1)
+        if not os.path.exists(model_path):
+            print(f"ERROR: Training completed but model not found at {model_path}")
+            sys.exit(1)
 
     print(f"Loading model from {model_path}")
     model = tf.keras.models.load_model(model_path)
