@@ -30,7 +30,7 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 import tensorflow as tf
 tf.get_logger().setLevel('ERROR')
 
-IMG_SIZE = (256, 256)
+IMG_SIZE = (512, 512)
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, ".."))
@@ -39,6 +39,19 @@ DEFAULT_TEST_DIR = os.path.join(PROJECT_ROOT, "data", "Application")
 TRAIN_SCRIPT = os.path.join(PROJECT_ROOT, "src", "model", "train_model.py")
 
 SUPPORTED_EXTENSIONS = (".jpg", ".jpeg", ".png")
+
+
+def preprocess_image_tensor(img):
+    """Normalize and resize while preserving aspect ratio via padding."""
+    img.set_shape([None, None, 3])
+    img = tf.image.convert_image_dtype(img, tf.float32)
+    img = tf.image.resize_with_pad(
+        img,
+        target_height=IMG_SIZE[0],
+        target_width=IMG_SIZE[1],
+        antialias=True,
+    )
+    return img
 
 
 def is_valid_image(filepath):
@@ -84,8 +97,7 @@ def classify_image(model, image_path):
     """Run inference on a single image. Returns (label, confidence)."""
     raw = tf.io.read_file(image_path)
     img = tf.image.decode_image(raw, channels=3, expand_animations=False)
-    img.set_shape([None, None, 3])
-    img = tf.image.resize(img, IMG_SIZE) / 255.0
+    img = preprocess_image_tensor(img)
     img = tf.expand_dims(img, 0)
 
     prob = model.predict(img, verbose=0)[0][0]
