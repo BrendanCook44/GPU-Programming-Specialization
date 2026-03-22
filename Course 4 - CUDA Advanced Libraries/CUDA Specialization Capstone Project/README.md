@@ -8,6 +8,7 @@ This project uses Tensorflow with cuDNN for GPU Acceleration to train a Convolut
 - GPU-accelerated neural network training using TensorFlow with cuDNN
 - Binary classification CNN model trained to detect planetary objects in images
 - Trained on a dataset of 10,000 total images (with augmentation) to accurately recognize planetary objects
+- Performs gpu-powered inference/classification on all images present in the data/application folder
 
 **Use Case:**
 A CNN (convolutional neural network) is trained on a labeled dataset of planetary images using TensorFlow to detect whether a planetary object is present in a given image. This is especially helpful in automating space telescope and satellite image processing workflows to remove needing to manually filter out potential planetary objects by hand, which can be time consuming as they take 1000s of pictures.
