@@ -44,6 +44,8 @@ Then, run the application:
 bash run-application.sh
 ```
 
+The first-time load after running this command can take a bit of time as it is using all uncached packages + source code. Subsequent runs should run much faster.
+
 The application will load the trained model and classify every image in the `data/Application/` directory, determining whether each image contains a planetary object or not.
 
 A set of application images are provided by default. You are free to add your own test images to `data/Application/` for the model to evaluate — simply place any `.jpg`, `.jpeg`, or `.png` images in that directory before running the application.
