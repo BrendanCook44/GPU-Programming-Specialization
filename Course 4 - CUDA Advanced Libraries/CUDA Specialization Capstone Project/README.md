@@ -2,15 +2,17 @@
 
 ## Overview
 
-This project uses Tensorflow with cuDNN for GPU Acceleration to train a Neural Network to recognize planetary objects in space.
+This project uses Tensorflow with cuDNN for GPU Acceleration to train a Convolutional Neural Network to recognize planetary objects in space.
 
 **Key Features:**
 - GPU-accelerated neural network training using TensorFlow with cuDNN
-- Binary classification model trained to detect planetary objects in images
-- Evaluated against a large secondary dataset of telescope-captured space objects
+- Binary classification CNN model trained to detect planetary objects in images
+- Trained on a dataset of 10,000 images to accurately recognize planetary objects
 
 **Use Case:**
-A neural network is trained on a labeled dataset of planetary images using TensorFlow to detect whether a planetary object is present in a given image. A secondary dataset containing thousands of space objects captured via telescope is then used to test the model and classify planetary objects among the broader collection of space imagery.
+A CNN (convolutional neural network) is trained on a labeled dataset of planetary images using TensorFlow to detect whether a planetary object is present in a given image. This is especially helpful in automating space telescope and satellite workflows to remove needing to manually filter out potential planetary objects by hand, which can be time consuming as they take 1000s of pictures.
+
+The model file is placed under src/model/planetary_detector.keras and is the output
 
 ## Installation
 
