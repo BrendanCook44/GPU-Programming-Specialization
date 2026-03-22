@@ -36,6 +36,8 @@ First, set up the environment by running the setup script. This will install all
 bash setup-environment.sh
 ```
 
+The setup process may display a couple warnings which can be safely ignored. The setup process will take a couple minutes.
+
 Then, run the application:
 
 ```bash
