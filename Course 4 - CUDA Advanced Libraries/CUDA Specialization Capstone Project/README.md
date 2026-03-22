@@ -14,7 +14,7 @@ A CNN (convolutional neural network) is trained on a labeled dataset of planetar
 
 ## Installation
 
-From the Coursera lab environment, clone the repository using the following command:
+From the Coursera lab environment terminal, clone the repository using the following command:
 
 ```bash
 git clone https://github.com/BrendanCook44/GPU-Programming-Specialization.git
