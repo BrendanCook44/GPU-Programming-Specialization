@@ -49,7 +49,9 @@ The first-time load after running this command can take a bit of time as it is u
 
 The application will load the trained model and classify every image in the `data/Application/` directory, determining whether each image contains a planetary object or not.
 
-A set of application images are provided by default. You are free to add your own test images to `data/Application/` for the model to evaluate — simply place any `.jpg`, `.jpeg`, or `.png` images in that directory before running the application.
+A set of application images are provided by default. You are free to add your own test images to `data/Application/` for the model to evaluate — simply place any `.jpg`, `.jpeg`, or `.png` images in that directory before running the application. 
+
+The application and trained model are primarily intended to be used with space imagery, so I recommend any new images added fit that description as that is the intended use case.
 
 ## Code Organization
 
