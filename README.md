@@ -7,13 +7,25 @@ For more information about the specialization, visit the [Coursera course page](
 ## Contents
 
 - Course 1: Introduction to Concurrent Programming with GPUs
-  - Projects and assignments are located in `Course 1 - Introduction to Concurrent Programming with GPUs/`
+  - CUDA Example Project
+  - CUDA Software Layers and Compilation
+  - Dining Philosophers
+  - Python Parallel Programming
 - Course 2: Introduction to Parallel Programming with CUDA
-  - Projects and assignments are located in `Course 2 - Introduction to Parallel Programming with CUDA/`
+  - Allocation and Assignment of Different Types of Host and Global Memory
+  - CUDA Device Memory Analysis
+  - CUDA Shared and Constant Memory Image Manipulation
+  - Data Search
 - Course 3: CUDA at Scale for the Enterprise
-  - Projects and assignments are located in `Course 3 - CUDA at Scale for the Enterprise/`
+  - CUDA at Scale Independent Project
+  - CUDA GPU Identification
+  - CUDA Merge Sort
+  - CUDA Streams and Events
 - Course 4: CUDA Advanced Libraries
-  - Projects and assignments are located in `Course 4 - CUDA Advanced Libraries/`
+  - CUDA Linear Algebra Libraries
+  - CUDA Specialization Capstone Project
+  - CUDA Thrust Library
+  - cuFFT Image Processing
 
 ## How to Use
 
