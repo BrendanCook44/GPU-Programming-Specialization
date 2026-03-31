@@ -2,7 +2,7 @@
 
 This repository contains all projects & assignments associated with the completion of the GPU Programming Specialization offered by Johns Hopkins University and Coursera.
 
-For more information about the certification, visit the [Coursera course page](https://www.coursera.org/specializations/gpu-programming).
+For more information about the specialization, visit the [Coursera course page](https://www.coursera.org/specializations/gpu-programming).
 
 ## Contents
 
